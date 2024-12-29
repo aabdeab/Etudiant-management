@@ -14,7 +14,7 @@ const Notes = () => {
   const {id} = useParams();
 
   useEffect(() => {
-    fetch(`http://localhost:8080/etudiants/${id}/notes?page=${pageIndex}&size=5`)
+    fetch(`http://backend.local/etudiants/${id}/notes?page=${pageIndex}&size=5`)
     .then(response => response.json())
     .then(data => setObj(data))
 
@@ -68,7 +68,6 @@ const Notes = () => {
         <Link style={{marginLeft: '10px'}} to={`/`}>
           retour a la page des etudians
         </Link>
-
     </div>
   )
 }

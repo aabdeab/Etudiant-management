@@ -8,7 +8,7 @@ const AjouterNote = () => {
   const {id} = useParams();
 
   function handleAjouter() {
-    fetch(`http://localhost:8080/etudiants/${id}/notes`, {
+    fetch(`http://backend.local/etudiants/${id}/notes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

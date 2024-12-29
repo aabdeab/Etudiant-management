@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - app-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  frontend:
+    image: abdelkrims/frontend:latest
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`frontend.local`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+  backend:
+    image: abdelkrims/backend:latest
+     
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/Etudiants
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+    labels:
+     - "traefik.http.routers.backend.rule=Host(`backend.local`)"
+     - "traefik.http.services.backend.loadbalancer.server.port=8080"
+     - "traefik.http.middlewares.cors.headers.accessControlAllowOrigins=http://frontend.local"
+     - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=GET,POST,PUT,DELETE,OPTIONS"
+     - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=Origin,Content-Type,Accept,Authorization"
+     - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
+     - "traefik.http.routers.backend.middlewares=cors"
+
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=Etudiants
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+
+networks:
+  app-network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  pgdata:
+    driver: local

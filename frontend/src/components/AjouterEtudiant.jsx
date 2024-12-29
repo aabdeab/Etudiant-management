@@ -6,7 +6,7 @@ const AjouterEtudiant = () => {
   const navigate = useNavigate();
 
   function handleAjouter() {
-    fetch('http://localhost:8080/etudiants', {
+    fetch('http://backend.local/etudiants', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -24,7 +24,7 @@ const AjouterEtudiant = () => {
   return (
     <div>
       <h1>Ajouter Etudiant</h1>
-      <form action="http://localhost:8080/etudiants"
+      <form action="http://backend.local/etudiants"
       method='POST'
       onSubmit={(event) => {
         event.preventDefault();
